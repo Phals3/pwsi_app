@@ -8,13 +8,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.pwsi.BuildConfig;
 import com.example.pwsi.R;
 import com.google.android.gms.common.api.Status;
@@ -29,12 +31,14 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 
+
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
@@ -42,12 +46,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap map;
     private double latitude;
     private double longitude;
-    private String name;
+    private String location_name;
     AutocompleteSupportFragment placeAutoComplete;
     Spinner spinnerCategories;
 
     @Override
-    public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         // Get a handle to the fragment and register the callback.
         Places.initialize(requireContext(), BuildConfig.MAPS_API_KEY);
         Places.createClient(requireContext());
@@ -56,11 +60,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         placeAutoComplete.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
         placeAutoComplete.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
-            public void onPlaceSelected(@NonNull @NotNull Place place) {
+            public void onPlaceSelected(@NotNull Place place) {
                 if (place.getLatLng() != null) {
                     latitude = place.getLatLng().latitude;
                     longitude = place.getLatLng().longitude;
-                    name = place.getName();
+                    location_name = place.getName();
                     // Creating a marker
                     final MarkerOptions markerOptions = new MarkerOptions();
 
@@ -68,7 +72,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
                     // Setting the title for the marker.
                     // This will be displayed on taping the marker
-                    markerOptions.title(name);
+                    markerOptions.title(location_name);
 
                     // Clears the previously touched position
                     map.clear();
@@ -83,7 +87,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             }
 
             @Override
-            public void onError(@NonNull @NotNull Status status) {
+            public void onError(@NotNull Status status) {
             }
         });
 
@@ -98,15 +102,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         categories.add("kategoria3");
 
         ArrayAdapter<String> categoriesAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, categories);
-
         spinnerCategories = view.findViewById(R.id.spinner);
         spinnerCategories.setAdapter(categoriesAdapter);
 
         Button sendButton = view.findViewById(R.id.sendButton);
-        sendButton.setOnClickListener((view1) -> {
-            Bundle eventData = getEventData(view);
-            sendEventData(eventData);
-            redirectResult(eventData);
+        sendButton.setOnClickListener((e) -> {
+            Bundle bundle = getEventData(view);
+            sendAddCaseRequest(bundle);
         });
     }
 
@@ -114,18 +116,63 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         String nameString = ((TextView) view.findViewById(R.id.editTextAddIncidentName)).getText().toString();
         String categoryString = spinnerCategories.getSelectedItem().toString();
         String descriptionString = ((TextView) view.findViewById(R.id.editTextAddIncidentDescription)).getText().toString();
-        String locationString = String.format(Locale.getDefault(),"%f, %f", latitude, longitude);
 
         Bundle bundle = new Bundle();
-        bundle.putString("name", nameString);
-        bundle.putString("category", categoryString);
-        bundle.putString("description", descriptionString);
-        bundle.putString("location", locationString);
+        bundle.putString("Category", categoryString);
+        bundle.putString("Name", nameString);
+        bundle.putString("Description", descriptionString);
+        bundle.putString("Date", "terazniejsza_data");
+        bundle.putString("Resolved", "0");
+        bundle.putString("Longitude", Double.toString(longitude));
+        bundle.putString("Latitude", Double.toString(latitude));
         return bundle;
     }
 
-    public boolean sendEventData(Bundle bundle) {
-       return false;
+    public void sendAddCaseRequest(Bundle bundle) {
+        String category = bundle.getString("Category", "");
+        String name = bundle.getString("Name", "");
+        String description = bundle.getString("Description", "");
+        String date = bundle.getString("Date", "");
+        String resolved = bundle.getString("Resolved", "");
+        String longitude = bundle.getString("Longitude", "");
+        String latitude = bundle.getString("Latitude", "");
+
+        JSONObject caseJSON = new JSONObject();
+        try {
+            caseJSON.put("Category", category);
+            caseJSON.put("Name", name);
+            caseJSON.put("Description", description);
+            caseJSON.put("Date", date);
+            caseJSON.put("Resolved", resolved);
+            caseJSON.put("Longitude", longitude);
+            caseJSON.put("Latitude", latitude);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
+
+
+        String url = BuildConfig.API_URL;
+
+//         Request a string response from the provided URL.
+        JsonObjectRequest request = new JsonObjectRequest(url, caseJSON,
+                response -> {
+                    Bundle bundler = new Bundle();
+                    bundler.putString("response", caseJSON.toString());
+                    redirectResult(bundler);
+                },
+                error -> {
+                    Bundle bundler = new Bundle();
+                    bundler.putString("response", caseJSON.toString());
+                    redirectResult(bundler);
+                });
+
+        // Add the request to the RequestQueue.
+        queue.add(request);
+
     }
 
     public void redirectResult(Bundle bundle) {
@@ -133,7 +180,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         navController.navigate(R.id.action_nav_home_to_resultFragment, bundle);
     }
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
+    public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
         return inflater.inflate(R.layout.fragment_home, container, false);
