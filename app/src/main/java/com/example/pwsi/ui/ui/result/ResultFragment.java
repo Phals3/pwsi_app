@@ -46,9 +46,4 @@ public class ResultFragment extends Fragment {
         super.onDestroyView();
     }
 
-    public static ResultFragment newInstance(Bundle bundle) {
-        ResultFragment fragment = new ResultFragment();
-        fragment.setArguments(bundle);
-        return fragment;
-    }
 }
