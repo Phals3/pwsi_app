@@ -118,34 +118,34 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         String descriptionString = ((TextView) view.findViewById(R.id.editTextAddIncidentDescription)).getText().toString();
 
         Bundle bundle = new Bundle();
-        bundle.putString("Category", categoryString);
-        bundle.putString("Name", nameString);
-        bundle.putString("Description", descriptionString);
-        bundle.putString("Date", "terazniejsza_data");
-        bundle.putString("Resolved", "0");
-        bundle.putString("Longitude", Double.toString(longitude));
-        bundle.putString("Latitude", Double.toString(latitude));
+        bundle.putString("category", categoryString);
+        bundle.putString("name", nameString);
+        bundle.putString("description", descriptionString);
+        bundle.putString("date", "terazniejsza_data");
+        bundle.putString("resolved", "0");
+        bundle.putString("longitude", Double.toString(longitude));
+        bundle.putString("latitude", Double.toString(latitude));
         return bundle;
     }
 
     public void sendAddCaseRequest(Bundle bundle) {
-        String category = bundle.getString("Category", "");
-        String name = bundle.getString("Name", "");
-        String description = bundle.getString("Description", "");
-        String date = bundle.getString("Date", "");
-        String resolved = bundle.getString("Resolved", "");
-        String longitude = bundle.getString("Longitude", "");
-        String latitude = bundle.getString("Latitude", "");
+        String category = bundle.getString("category", "");
+        String name = bundle.getString("name", "");
+        String description = bundle.getString("description", "");
+        String date = bundle.getString("date", "");
+        String resolved = bundle.getString("resolved", "");
+        String longitude = bundle.getString("longitude", "");
+        String latitude = bundle.getString("latitude", "");
 
         JSONObject caseJSON = new JSONObject();
         try {
-            caseJSON.put("Category", category);
-            caseJSON.put("Name", name);
-            caseJSON.put("Description", description);
-            caseJSON.put("Date", date);
-            caseJSON.put("Resolved", resolved);
-            caseJSON.put("Longitude", longitude);
-            caseJSON.put("Latitude", latitude);
+            caseJSON.put("category", category);
+            caseJSON.put("name", name);
+            caseJSON.put("description", description);
+            caseJSON.put("date", date);
+            caseJSON.put("resolved", resolved);
+            caseJSON.put("longitude", longitude);
+            caseJSON.put("latitude", latitude);
         } catch (JSONException e) {
             e.printStackTrace();
             return;
