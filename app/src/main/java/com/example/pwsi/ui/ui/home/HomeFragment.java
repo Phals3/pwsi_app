@@ -8,12 +8,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -118,34 +118,37 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         String descriptionString = ((TextView) view.findViewById(R.id.editTextAddIncidentDescription)).getText().toString();
 
         Bundle bundle = new Bundle();
-        bundle.putString("category", categoryString);
+        bundle.putInt("userID", 1);
         bundle.putString("name", nameString);
+//        bundle.putString("category", categoryString);
         bundle.putString("description", descriptionString);
         bundle.putString("date", "terazniejsza_data");
-        bundle.putString("resolved", "0");
-        bundle.putString("longitude", Double.toString(longitude));
-        bundle.putString("latitude", Double.toString(latitude));
+//        bundle.putInt("resolved", 0);
+        bundle.putDouble("longitude", longitude);
+        bundle.putDouble("latitude", latitude);
+        bundle.putString("location_name", location_name);
         return bundle;
     }
 
     public void sendAddCaseRequest(Bundle bundle) {
-        String category = bundle.getString("category", "");
+        int userID = bundle.getInt("userID", 1);
         String name = bundle.getString("name", "");
+//        String category = bundle.getString("category", "");
         String description = bundle.getString("description", "");
         String date = bundle.getString("date", "");
-        String resolved = bundle.getString("resolved", "");
-        String longitude = bundle.getString("longitude", "");
-        String latitude = bundle.getString("latitude", "");
+        double longitude = bundle.getDouble("longitude", 0);
+        double latitude = bundle.getDouble("latitude", 0);
+
 
         JSONObject caseJSON = new JSONObject();
         try {
-            caseJSON.put("category", category);
             caseJSON.put("name", name);
+//            caseJSON.put("category", category);
             caseJSON.put("description", description);
             caseJSON.put("date", date);
-            caseJSON.put("resolved", resolved);
             caseJSON.put("longitude", longitude);
             caseJSON.put("latitude", latitude);
+            caseJSON.put("userID", userID);
         } catch (JSONException e) {
             e.printStackTrace();
             return;
@@ -154,11 +157,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
+        String url = BuildConfig.API_URL + "/case/new";
 
-        String url = BuildConfig.API_URL;
-
-//         Request a string response from the provided URL.
-        JsonObjectRequest request = new JsonObjectRequest(url, caseJSON,
+        // create JSON request object
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, caseJSON,
                 response -> {
                     Bundle bundler = new Bundle();
                     bundler.putString("response", caseJSON.toString());
@@ -166,7 +168,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 },
                 error -> {
                     Bundle bundler = new Bundle();
-                    bundler.putString("response", caseJSON.toString());
+                    bundler.putString("response", error.toString());
                     redirectResult(bundler);
                 });
 
