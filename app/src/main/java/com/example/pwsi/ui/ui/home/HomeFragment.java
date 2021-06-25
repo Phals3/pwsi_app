@@ -38,6 +38,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 
@@ -122,7 +123,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         bundle.putString("name", nameString);
 //        bundle.putString("category", categoryString);
         bundle.putString("description", descriptionString);
-        bundle.putString("date", "terazniejsza_data");
+        bundle.putString("date", new Date().toString());
 //        bundle.putInt("resolved", 0);
         bundle.putDouble("longitude", longitude);
         bundle.putDouble("latitude", latitude);
@@ -148,6 +149,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             caseJSON.put("date", date);
             caseJSON.put("longitude", longitude);
             caseJSON.put("latitude", latitude);
+            caseJSON.put("location_name", location_name);
             caseJSON.put("userID", userID);
         } catch (JSONException e) {
             e.printStackTrace();
