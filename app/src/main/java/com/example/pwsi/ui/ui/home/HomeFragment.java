@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
@@ -36,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -98,9 +100,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
 
         List<String> categories = new ArrayList<>();
-        categories.add("kategoria1");
         categories.add("Infrastruktura");
-        categories.add("kategoria3");
+        categories.add("Zagrozenie");
+        categories.add("Inne");
 
         ArrayAdapter<String> categoriesAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, categories);
         spinnerCategories = view.findViewById(R.id.spinner);
@@ -123,7 +125,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         bundle.putString("name", nameString);
 //        bundle.putString("category", categoryString);
         bundle.putString("description", descriptionString);
-        bundle.putString("date", new Date().toString());
+        bundle.putString("date", getCurrentDate());
 //        bundle.putInt("resolved", 0);
         bundle.putDouble("longitude", longitude);
         bundle.putDouble("latitude", latitude);
@@ -171,12 +173,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 error -> {
                     Bundle bundler = new Bundle();
                     bundler.putString("response", error.toString());
-                    redirectResult(bundler);
+                    Toast.makeText(requireActivity().getApplicationContext(), "BLAD", Toast.LENGTH_LONG).show();
                 });
 
         // Add the request to the RequestQueue.
         queue.add(request);
 
+    }
+
+    public String getCurrentDate() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return format.format(new Date());
     }
 
     public void redirectResult(Bundle bundle) {

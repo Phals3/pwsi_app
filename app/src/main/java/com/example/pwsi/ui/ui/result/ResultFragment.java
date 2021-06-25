@@ -21,17 +21,9 @@ public class ResultFragment extends Fragment {
         Bundle bundle = getArguments();
         assert bundle != null;
 
-//        String category = bundle.getString("Category", "");
-//        String name = bundle.getString("Name", "");
-//        String description = bundle.getString("Description", "");
-//        String date = bundle.getString("Date", "");
-//        String resolved = bundle.getString("Resolved", "");
-//        String longitude = bundle.getString("Longitude", "");
-//        String latitude = bundle.getString("Latitude", "");
-
         resultTextView = (TextView) view.findViewById(R.id.resultTextView);
 
-        String dataString = bundle.getString("response", "");
+        String dataString = "New case added:\n\n" + bundle.getString("response", "");
         resultTextView.setText(dataString);
     }
 
